@@ -49,4 +49,4 @@ docker-compose.yml
 
 # Local development
 run_migrations.py
-requirements.txt
+requirements_local.txt

@@ -1,4 +1,4 @@
-"""Vercel entry point - Fast Analysis only."""
+"""Vercel entry point - Fast Analysis only (standalone)."""
 
 import os
 import sys
@@ -9,21 +9,21 @@ sys.path.insert(0, os.path.dirname(__file__))
 from flask import Flask, render_template, request, jsonify, Response
 from werkzeug.utils import secure_filename
 
-# Create Flask app
+# Create Flask app WITHOUT importing app module
 app = Flask(__name__,
             template_folder='app/templates',
             static_folder='app/static')
 app.config['UPLOAD_FOLDER'] = '/tmp'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
 
-# Import services
+# Import ONLY the services we need (skip app/__init__.py completely)
 from app.services import fast_analysis, adv_suggestions
 
 
 # ── Pages ────────────────────────────────────────────────────
 @app.route("/")
 def index():
-    """Redirect to fast analysis page."""
+    """Fast Bulk File Analysis page."""
     return render_template("fast_analysis.html")
 
 

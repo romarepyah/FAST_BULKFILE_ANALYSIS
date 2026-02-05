@@ -1,11 +1,18 @@
 """Vercel entry point - Fast Analysis only."""
 
 import os
+import sys
+
+# Add current directory to path for imports
+sys.path.insert(0, os.path.dirname(__file__))
+
 from flask import Flask, render_template, request, jsonify, Response
 from werkzeug.utils import secure_filename
 
 # Create Flask app
-app = Flask(__name__)
+app = Flask(__name__,
+            template_folder='app/templates',
+            static_folder='app/static')
 app.config['UPLOAD_FOLDER'] = '/tmp'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
 

@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+{% block title %}Fast Bulk Analysis{% endblock %}
+{% block content %}
+<h1>Fast Bulk File Analysis</h1>
+
+<!-- Upload -->
+<details id="upload-section" class="panel" open>
+  <summary style="cursor:pointer;font-weight:600;font-size:.95rem">Upload File</summary>
+  <div style="margin-top:.8rem">
+    <div id="fa-drop-zone" class="drop-zone">
+      <div class="drop-icon">&#128202;</div>
+      <p>Drag &amp; drop an Amazon Bulk XLSX/XLS file here, or click to browse</p>
+      <p class="hint">The file is analysed in-memory &mdash; nothing is saved to the database.</p>
+      <input type="file" id="fa-file-input" accept=".xlsx,.xls">
+    </div>
+    <div id="fa-file-info" class="file-list"></div>
+    <button id="fa-analyze-btn" class="btn btn-primary" disabled>Analyze File</button>
+  </div>
+</details>
+
+<!-- Loading -->
+<div id="fa-loading" class="panel" style="display:none">
+  <h3>Analysing&hellip;</h3>
+  <div class="progress-bar"><div class="progress-fill" id="fa-progress"></div></div>
+</div>
+
+<!-- Results (hidden until analysis) -->
+<div id="fa-results" style="display:none">
+
+  <!-- Summary cards -->
+  <details class="panel" open>
+    <summary style="cursor:pointer;font-weight:600;font-size:.95rem">Performance Summary</summary>
+    <div class="cards" id="fa-cards" style="margin-top:.8rem"></div>
+  </details>
+
+  <!-- Sheets overview -->
+  <details class="panel" open>
+    <summary style="cursor:pointer;font-weight:600;font-size:.95rem">Sheets Found</summary>
+    <div id="fa-sheets" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem"></div>
+  </details>
+
+  <!-- Data tables section -->
+  <details open style="margin-bottom:1.2rem">
+    <summary class="section-toggle">Data Tables</summary>
+
+    <!-- Tab switcher -->
+    <div class="tab-switcher">
+      <button class="tab-btn active" data-tab="tab-campaigns">Campaigns</button>
+      <button class="tab-btn" data-tab="tab-search-terms">Top Search Terms</button>
+      <button class="tab-btn" data-tab="tab-wasted">Wasted Spend</button>
+      <button class="tab-btn" data-tab="tab-entities">Entity Breakdown</button>
+    </div>
+
+    <!-- Tab: Campaigns -->
+    <div id="tab-campaigns" class="tab-content active">
+      <div class="panel" style="overflow-x:auto;border-radius:0 0 10px 10px;margin-top:0">
+        <div class="tbl-toolbar">
+          <button class="btn btn-sm col-settings-btn" data-table="campaigns">Columns</button>
+        </div>
+        <table class="tbl" id="fa-campaigns-tbl">
+          <thead><tr></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab: Top Search Terms -->
+    <div id="tab-search-terms" class="tab-content">
+      <div class="panel" style="overflow-x:auto;border-radius:0 0 10px 10px;margin-top:0">
+        <div class="tbl-toolbar">
+          <button class="btn btn-sm col-settings-btn" data-table="searchTerms">Columns</button>
+        </div>
+        <table class="tbl" id="fa-st-tbl">
+          <thead><tr></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab: Wasted Spend -->
+    <div id="tab-wasted" class="tab-content">
+      <div class="panel" style="overflow-x:auto;border-radius:0 0 10px 10px;margin-top:0">
+        <p class="hint" style="margin-bottom:.8rem">Search terms with spend but zero orders &mdash; sorted by spend descending.</p>
+        <div class="tbl-toolbar">
+          <button class="btn btn-sm col-settings-btn" data-table="wasted">Columns</button>
+        </div>
+        <table class="tbl" id="fa-wasted-tbl">
+          <thead><tr></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab: Entity Breakdown -->
+    <div id="tab-entities" class="tab-content">
+      <div class="panel" style="overflow-x:auto;border-radius:0 0 10px 10px;margin-top:0">
+        <div class="tbl-toolbar">
+          <button class="btn btn-sm col-settings-btn" data-table="entities">Columns</button>
+        </div>
+        <table class="tbl" id="fa-entity-tbl">
+          <thead><tr></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+</div>
+
+<!-- ═══ SUGGESTIONS ═══════════════════════════════════════ -->
+<div id="fa-suggestions-section" style="display:none">
+  <details open>
+    <summary class="section-toggle">Optimization Suggestions</summary>
+
+    <!-- Optimization Rules Configuration -->
+    <details class="panel" id="rules-config-panel">
+      <summary style="cursor:pointer;font-weight:600;font-size:.95rem">
+        ⚙️ Optimization Rules Configuration
+      </summary>
+      <p class="hint" style="margin:.5rem 0 1rem">Configure custom rules for each suggestion category. Rules are evaluated in order — first matching rule wins.</p>
+
+      <!-- Rules tabs -->
+      <div class="rules-tabs">
+        <button class="rules-tab active" data-rules-tab="rules-placement">Placement Optimization</button>
+        <button class="rules-tab" data-rules-tab="rules-exact">Create Exact Campaign</button>
+        <button class="rules-tab" data-rules-tab="rules-bids">Increase Bids</button>
+        <button class="rules-tab" data-rules-tab="rules-negatives">Search Term Negatives</button>
+        <button class="rules-tab" data-rules-tab="rules-pause">Pause Targets/Campaigns</button>
+      </div>
+
+      <!-- ═══ Placement Optimization Rules ═══ -->
+      <div id="rules-placement" class="rules-content active">
+        <div class="rules-header">
+          <h4>Placement Optimization Rules</h4>
+          <p class="hint">Adjust placement percentages and bids based on ACOS performance per placement.</p>
+        </div>
+        <div class="rules-list" id="placement-rules-list"></div>
+        <button class="btn btn-sm" onclick="addRule('placement')">+ Add Rule</button>
+        <div class="rules-defaults">
+          <h5>Default Settings</h5>
+          <div class="threshold-grid">
+            <div class="field">
+              <label>ACOS ineffective threshold (%)</label>
+              <input type="number" id="th-acos-ineffective" value="35" step="1" min="1" max="200">
+            </div>
+            <div class="field">
+              <label>Max placement percentage (%)</label>
+              <input type="number" id="th-max-placement" value="900" step="10" min="0" max="900">
+            </div>
+            <div class="field">
+              <label>Bid reduction ratio</label>
+              <input type="number" id="th-bid-reduction" value="0.5" step="0.1" min="0.1" max="1">
+              <span class="hint">e.g. 0.5 = reduce bids by 50%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Create Exact Campaign Rules ═══ -->
+      <div id="rules-exact" class="rules-content">
+        <div class="rules-header">
+          <h4>Create Exact Campaign Rules</h4>
+          <p class="hint">Create new exact match campaigns from high-performing search terms.</p>
+        </div>
+        <div class="rules-list" id="exact-rules-list"></div>
+        <button class="btn btn-sm" onclick="addRule('exact')">+ Add Rule</button>
+        <div class="rules-defaults">
+          <h5>Default Settings</h5>
+          <div class="threshold-grid">
+            <div class="field">
+              <label>Minimum orders</label>
+              <input type="number" id="th-orders-exact" value="2" step="1" min="1">
+            </div>
+            <div class="field">
+              <label>Minimum CVR (%)</label>
+              <input type="number" id="th-cvr-exact" value="20" step="1" min="1" max="100">
+            </div>
+            <div class="field">
+              <label>Target ACOS (%)</label>
+              <input type="number" id="th-acos-target" value="30" step="1" min="1" max="100">
+            </div>
+            <div class="field">
+              <label>Bid multiplier on CPC</label>
+              <input type="number" id="th-bid-multiplier" value="1.1" step="0.1" min="0.5" max="3">
+              <span class="hint">e.g. 1.1 = suggested bid is CPC × 1.1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Increase Bids Rules ═══ -->
+      <div id="rules-bids" class="rules-content">
+        <div class="rules-header">
+          <h4>Increase Bids Rules</h4>
+          <p class="hint">Boost bids for high-performing campaigns/keywords to get more traffic.</p>
+        </div>
+        <div class="rules-list" id="bids-rules-list"></div>
+        <button class="btn btn-sm" onclick="addRule('bids')">+ Add Rule</button>
+        <div class="rules-defaults">
+          <h5>Default Settings</h5>
+          <div class="threshold-grid">
+            <div class="field">
+              <label>Minimum CVR (%)</label>
+              <input type="number" id="th-cvr-bid" value="30" step="1" min="1" max="100">
+            </div>
+            <div class="field">
+              <label>Maximum ACOS (%)</label>
+              <input type="number" id="th-acos-bid" value="20" step="1" min="1" max="100">
+            </div>
+            <div class="field">
+              <label>ACOS ceiling for increase (%)</label>
+              <input type="number" id="th-acos-ceiling" value="25" step="1" min="1" max="100">
+            </div>
+            <div class="field">
+              <label>Bid increase step (%)</label>
+              <input type="number" id="th-bid-step" value="15" step="1" min="1" max="100">
+            </div>
+            <div class="field">
+              <label>Minimum orders</label>
+              <input type="number" id="th-orders-bid" value="3" step="1" min="1">
+            </div>
+            <div class="field">
+              <label>Minimum clicks</label>
+              <input type="number" id="th-clicks-bid" value="10" step="1" min="1">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Search Term Negatives Rules ═══ -->
+      <div id="rules-negatives" class="rules-content">
+        <div class="rules-header">
+          <h4>Search Term Negatives Rules</h4>
+          <p class="hint">Add negative keywords for search terms wasting spend without conversions.</p>
+        </div>
+        <div class="rules-list" id="negatives-rules-list"></div>
+        <button class="btn btn-sm" onclick="addRule('negatives')">+ Add Rule</button>
+        <div class="rules-defaults">
+          <h5>Default Settings</h5>
+          <div class="threshold-grid">
+            <div class="field">
+              <label>Minimum clicks (0 orders)</label>
+              <input type="number" id="th-clicks-neg" value="10" step="1" min="1">
+            </div>
+            <div class="field">
+              <label>Minimum spend ($)</label>
+              <input type="number" id="th-spend-neg" value="5" step="1" min="0">
+            </div>
+            <div class="field">
+              <label>Negative match type</label>
+              <select id="th-neg-match-type">
+                <option value="Negative Exact" selected>Negative Exact</option>
+                <option value="Negative Phrase">Negative Phrase</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Pause Targets/Campaigns Rules ═══ -->
+      <div id="rules-pause" class="rules-content">
+        <div class="rules-header">
+          <h4>Pause Targets / Campaigns Rules</h4>
+          <p class="hint">Pause underperforming keywords, targets, or entire campaigns.</p>
+        </div>
+        <div class="rules-list" id="pause-rules-list"></div>
+        <button class="btn btn-sm" onclick="addRule('pause')">+ Add Rule</button>
+        <div class="rules-defaults">
+          <h5>Default Settings</h5>
+          <div class="threshold-grid">
+            <div class="field">
+              <label>Campaign pause: min spend ($)</label>
+              <input type="number" id="th-spend-camp" value="15" step="1" min="1">
+            </div>
+            <div class="field">
+              <label>Target pause: min spend ($)</label>
+              <input type="number" id="th-spend-target" value="10" step="1" min="1">
+            </div>
+            <div class="field">
+              <label>Max ACOS before pause (%)</label>
+              <input type="number" id="th-acos-pause" value="100" step="5" min="1" max="500">
+              <span class="hint">Pause if ACOS > this with 0 orders</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Apply button -->
+      <div style="margin-top:1rem;display:flex;gap:.5rem;align-items:center">
+        <button id="fa-rerun-btn" class="btn btn-primary">Apply Rules & Re-run</button>
+        <button class="btn btn-sm" onclick="resetRulesToDefaults()">Reset to Defaults</button>
+        <button class="btn btn-sm" onclick="exportRules()">Export Rules</button>
+        <button class="btn btn-sm" onclick="document.getElementById('import-rules-input').click()">Import Rules</button>
+        <input type="file" id="import-rules-input" accept=".json" style="display:none" onchange="importRules(event)">
+      </div>
+    </details>
+
+    <!-- Category chips -->
+    <div id="fa-sug-chips" class="chips"></div>
+
+    <!-- Action bar -->
+    <div id="fa-sug-action-bar" class="panel action-bar" style="display:none">
+      <span id="fa-sug-count">0 selected</span>
+      <button id="fa-select-all" class="btn btn-sm">Select All Visible</button>
+      <button id="fa-deselect-all" class="btn btn-sm">Deselect All</button>
+      <button id="fa-preview-btn" class="btn btn-sm btn-success">Preview Actions</button>
+      <button id="fa-generate-csv" class="btn btn-primary">Generate Bulk CSV</button>
+    </div>
+
+    <!-- Suggestions list -->
+    <div id="fa-sug-list"></div>
+
+    <!-- Preview table (hidden until Preview clicked) -->
+    <details id="fa-preview-panel" class="panel" style="display:none" open>
+      <summary style="cursor:pointer;font-weight:600;font-size:.95rem">Action Preview</summary>
+      <div style="overflow-x:auto;margin-top:.5rem">
+        <div class="tbl-toolbar">
+          <button class="btn btn-sm col-settings-btn" data-table="preview">Columns</button>
+        </div>
+        <table class="tbl" id="fa-preview-tbl">
+          <thead><tr></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </details>
+  </details>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/fast_analysis.js') }}"></script>
+{% endblock %}

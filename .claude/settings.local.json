@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(nslookup:*)",
+      "Bash(host:*)",
+      "Bash(dig:*)",
+      "Bash(wc:*)",
+      "Bash(curl:*)",
+      "Bash(FLASK_APP=app FLASK_DEBUG=1 python3:*)"
+    ]
+  }
+}

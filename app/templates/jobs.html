@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Bulk Jobs{% endblock %}
+{% block content %}
+<h1>Bulk Job History</h1>
+<div class="panel">
+  <table class="tbl" id="jobs-table">
+    <thead>
+      <tr><th>Created</th><th>Account</th><th>Status</th><th>Actions</th><th>Download</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
+{% endblock %}

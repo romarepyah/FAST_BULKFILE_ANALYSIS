@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Suggestions{% endblock %}
+{% block content %}
+<h1>Optimization Suggestions</h1>
+
+<!-- Filters -->
+<div class="panel">
+  <form id="sug-filter" class="filter-grid">
+    <div class="field">
+      <label>From</label>
+      <input type="date" id="sf-from" name="date_from">
+    </div>
+    <div class="field">
+      <label>To</label>
+      <input type="date" id="sf-to" name="date_to">
+    </div>
+    <div class="field">
+      <label>Account</label>
+      <select id="sf-account" name="account_id"><option value="">All</option></select>
+    </div>
+    <div class="field">
+      <label>Portfolio</label>
+      <select id="sf-portfolio" name="portfolio_id"><option value="">All</option></select>
+    </div>
+    <div class="field" style="align-self:end">
+      <button type="submit" class="btn btn-primary">Analyze</button>
+    </div>
+  </form>
+</div>
+
+<!-- Category filter chips -->
+<div id="category-chips" class="chips" style="display:none"></div>
+
+<!-- Action bar -->
+<div id="action-bar" class="panel action-bar" style="display:none">
+  <span id="selected-count">0 selected</span>
+  <button id="select-all-btn" class="btn btn-sm">Select All Visible</button>
+  <button id="deselect-all-btn" class="btn btn-sm">Deselect All</button>
+  <button id="generate-bulk-btn" class="btn btn-primary">Generate Bulk File</button>
+</div>
+
+<!-- Suggestions list -->
+<div id="suggestions-list"></div>
+
+<!-- Loading -->
+<div id="loading" class="panel" style="display:none;text-align:center">
+  <p>Analyzing your data…</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/suggestions.js') }}"></script>
+{% endblock %}

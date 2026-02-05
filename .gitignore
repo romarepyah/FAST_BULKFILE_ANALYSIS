@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+venv/
+uploads/*
+bulk_outputs/*
+!uploads/.gitkeep
+!bulk_outputs/.gitkeep
+.DS_Store
+*.egg-info/
+dist/
+build/

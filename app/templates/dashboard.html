@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Performance Dashboard</h1>
+
+<!-- Filters -->
+<div class="panel">
+  <form id="filter-form" class="filter-grid">
+    <div class="field">
+      <label>From</label>
+      <input type="date" id="f-from" name="date_from">
+    </div>
+    <div class="field">
+      <label>To</label>
+      <input type="date" id="f-to" name="date_to">
+    </div>
+    <div class="field">
+      <label>Account</label>
+      <select id="f-account" name="account_id"><option value="">All</option></select>
+    </div>
+    <div class="field">
+      <label>Portfolio</label>
+      <select id="f-portfolio" name="portfolio_id"><option value="">All</option></select>
+    </div>
+    <div class="field">
+      <label>Campaign</label>
+      <select id="f-campaign" name="campaign_id"><option value="">All</option></select>
+    </div>
+    <div class="field">
+      <label>Ad Product</label>
+      <select id="f-adproduct" name="ad_product"><option value="">All</option></select>
+    </div>
+    <div class="field">
+      <label>Match Type</label>
+      <select id="f-matchtype" name="match_type"><option value="">All</option></select>
+    </div>
+    <div class="field" style="align-self:end">
+      <button type="submit" class="btn btn-primary">Apply</button>
+    </div>
+  </form>
+</div>
+
+<!-- Summary cards -->
+<div class="cards" id="summary-cards">
+  <div class="card"><div class="card-label">Spend</div><div class="card-val" id="c-spend">--</div></div>
+  <div class="card"><div class="card-label">Sales</div><div class="card-val" id="c-sales">--</div></div>
+  <div class="card"><div class="card-label">ACOS</div><div class="card-val" id="c-acos">--</div></div>
+  <div class="card"><div class="card-label">ROAS</div><div class="card-val" id="c-roas">--</div></div>
+  <div class="card"><div class="card-label">Orders</div><div class="card-val" id="c-orders">--</div></div>
+  <div class="card"><div class="card-label">CTR</div><div class="card-val" id="c-ctr">--</div></div>
+</div>
+
+<!-- Metric toggles -->
+<div class="panel toggles">
+  <label><input type="checkbox" data-metric="spend" checked> Spend</label>
+  <label><input type="checkbox" data-metric="sales" checked> Sales</label>
+  <label><input type="checkbox" data-metric="acos" checked> ACOS</label>
+  <label><input type="checkbox" data-metric="orders"> Orders</label>
+  <label><input type="checkbox" data-metric="impressions"> Impressions</label>
+  <label><input type="checkbox" data-metric="clicks"> Clicks</label>
+  <label><input type="checkbox" data-metric="ctr"> CTR</label>
+  <label><input type="checkbox" data-metric="cpc"> CPC</label>
+  <label><input type="checkbox" data-metric="roas"> ROAS</label>
+</div>
+
+<!-- Chart -->
+<div class="panel chart-wrap">
+  <canvas id="chart"></canvas>
+</div>
+
+<!-- Table -->
+<div class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+    <h3>Daily Data</h3>
+    <button class="btn btn-sm" id="export-csv">Export CSV</button>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="tbl" id="data-table">
+      <thead>
+        <tr>
+          <th>Date</th><th>Impressions</th><th>Clicks</th><th>CTR</th>
+          <th>Spend</th><th>Sales</th><th>Orders</th><th>ACOS</th><th>CPC</th><th>ROAS</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

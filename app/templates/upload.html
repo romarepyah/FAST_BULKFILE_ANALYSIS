@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Upload Reports{% endblock %}
+{% block content %}
+<h1>Upload Reports</h1>
+
+<div class="panel">
+  <div id="drop-zone" class="drop-zone">
+    <div class="drop-icon">&#128194;</div>
+    <p>Drag &amp; drop CSV files here, or click to browse</p>
+    <p class="hint">Supports multiple files. Same structure as Total_Report CSV.</p>
+    <input type="file" id="file-input" multiple accept=".csv">
+  </div>
+
+  <div id="file-list" class="file-list"></div>
+
+  <button id="upload-btn" class="btn btn-primary" disabled>Upload &amp; Process</button>
+</div>
+
+<div id="progress-panel" class="panel" style="display:none">
+  <h3>Processing…</h3>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<div id="result-panel" class="panel" style="display:none">
+  <h3>Ingestion Results</h3>
+  <div id="result-content"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}

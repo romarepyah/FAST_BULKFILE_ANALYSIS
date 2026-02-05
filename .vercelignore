@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.example
+venv/
+env/
+
+# Database
+*.db
+*.sqlite
+db/
+
+# Tests
+.pytest_cache/
+tests/
+
+# Uploads & outputs
+uploads/
+bulk_outputs/
+*.xlsx
+*.xls
+*.csv
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Local development
+run_migrations.py
+requirements.txt

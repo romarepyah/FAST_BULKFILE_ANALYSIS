@@ -1,14 +1,17 @@
 """Flask application factory."""
 
 import logging, os
-from flask import Flask
-from .config import Config
+
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 
 def create_app():
+    """Create Flask app for local development."""
+    from flask import Flask
+    from .config import Config
+
     app = Flask(__name__)
     app.config.from_object(Config)
 

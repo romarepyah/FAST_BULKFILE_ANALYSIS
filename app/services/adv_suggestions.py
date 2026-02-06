@@ -997,7 +997,7 @@ def build_bulk_xlsx(selected_suggestions: List[Dict]) -> bytes:
 
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Sponsored Products"
+    ws.title = "Sponsored Products Campaigns"
 
     # Header row
     header_font = Font(bold=True)

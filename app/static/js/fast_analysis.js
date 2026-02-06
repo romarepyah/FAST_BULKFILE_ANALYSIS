@@ -806,6 +806,9 @@ async function runSuggestions() {
   const listEl = document.getElementById('fa-sug-list');
   listEl.innerHTML = '<div class="panel" style="text-align:center;color:#888">Computing suggestions...</div>';
 
+  // Clear preview panel when rerunning
+  document.getElementById('fa-preview-panel').style.display = 'none';
+
   try {
     const r = await fetch('/api/fast-analysis/suggestions', {
       method: 'POST',
@@ -815,10 +818,14 @@ async function runSuggestions() {
     const d = await r.json();
     if (!d.success) throw new Error(d.error || 'Failed');
 
+    // Reset all suggestions with new data
     allSugs = (d.suggestions || []).map(s => ({...s, checked: false}));
     activeSugCat = null;
+
+    // Update UI
     renderSugChips();
     renderSugs();
+    updateSugCount();
     document.getElementById('fa-sug-action-bar').style.display = allSugs.length ? '' : 'none';
     saveState();
   } catch(e) {
